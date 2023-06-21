@@ -11,12 +11,14 @@ import dev.nathan.studentmanagementv1.services.UserService;
 import dev.nathan.studentmanagementv1.utility.GlobalUtility;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -110,6 +112,23 @@ public class UserServiceImplementation implements UserService {
         }
         userRepo.delete(user);
         return true;
+    }
+
+    @Override
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        User user = userRepo.getUserByPhoneNumber(username);
+        if (user == null) {
+            throw new UsernameNotFoundException("Invalid username or password");
+        }
+
+        return new org.springframework.security.core.userdetails.User(user.getUserName(), user.getPassword(), mapRolesToAuthorities(user.getTheRole()));
+    }
+
+    private Collection<? extends GrantedAuthority> mapRolesToAuthorities(Role theRole) {
+        Set<GrantedAuthority> grantedAuthorities = new HashSet<>();
+        SimpleGrantedAuthority auth = new SimpleGrantedAuthority(theRole.getName());
+        grantedAuthorities.add(auth);
+        return grantedAuthorities;
     }
 
 }

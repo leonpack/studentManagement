@@ -6,6 +6,7 @@ import dev.nathan.studentmanagementv1.services.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -16,6 +17,7 @@ public class UsersController {
     private final UserService userService;
 
     @GetMapping
+    @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<?> getAllUsers() {
         return new ResponseEntity<>(userService.getAllUsers(), HttpStatusCode.valueOf(200));
     }
